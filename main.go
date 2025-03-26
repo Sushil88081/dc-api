@@ -1,8 +1,9 @@
 package main
 
 import (
+	"doctor-on-demand/config"
 	"doctor-on-demand/handlers"
-	"doctor-on-demand/models"
+	repository "doctor-on-demand/repositories"
 	"doctor-on-demand/routes"
 
 	"github.com/labstack/echo"
@@ -11,17 +12,11 @@ import (
 func main() {
 	// Initialize Echo instance
 	e := echo.New()
+	db := config.ConnectDB()
+	doctorCollection := db.Collection("Doctors")
+	doctorRepo := repository.NewDoctorRepository(doctorCollection)
+	doctorHandler := handlers.NewDoctorHandler(doctorRepo)
+	routes.Routes(e, doctorHandler)
 
-	// Initialize logger
-	// logger := logrus.New()
-
-	// Initialize DoctorHandler with a proper models.DoctorList instance
-	doctorList := models.DoctorList{} // Ensure this is properly initialized
-	doctorHandler := handlers.NewDoctorHandler(doctorList)
-
-	// Setup routes
-	routes.DoctorRoutes(e, doctorHandler)
-
-	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
 }

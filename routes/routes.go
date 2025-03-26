@@ -6,9 +6,9 @@ import (
 	"github.com/labstack/echo"
 )
 
-func DoctorRoutes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
-	e.POST("/users", DoctorHandler.CreateDoctor)
-	e.GET("/users/:id", DoctorHandler.GetDoctor)
-	e.PUT("/users/:id", DoctorHandler.UpdateDoctor)
-	e.DELETE("/users/:id", DoctorHandler.DeleteDoctor)
+func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
+	e.POST("/doctors", DoctorHandler.Create())
+	// e.GET("/users/:id", DoctorHandler.)
+	// e.PUT("/users/:id", DoctorHandler.UpdateDoctor)
+	// e.DELETE("/users/:id", DoctorHandler.DeleteDoctor)
 }

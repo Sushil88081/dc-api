@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"doctor-on-demand/models"
+	repository "doctor-on-demand/repositories"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -9,43 +10,34 @@ import (
 )
 
 type Idoctor interface {
-	CreateDoctor(c echo.Context) error
-	GetDoctor(c echo.Context) error
-	DeleteDoctor(c echo.Context) error
-	UpdateDoctor(c echo.Context) error
+	Create() echo.HandlerFunc
+	Get() echo.HandlerFunc
+	Delete() echo.HandlerFunc
+	Update() echo.HandlerFunc
 }
 
 type DoctorHandler struct {
 	doctor models.DoctorList
+	repo   repository.IDoctorRepository
 }
 
-func NewDoctorHandler(doctor models.DoctorList) *DoctorHandler {
-	return &DoctorHandler{
-		doctor: doctor,
+func NewDoctorHandler(repo repository.IDoctorRepository) *DoctorHandler {
+	return &DoctorHandler{repo: repo}
+}
+
+func (d *DoctorHandler) Create() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		req := models.DoctorList{}
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+		}
+
+		err := d.repo.CreateDoctor(c.Request().Context(), req) // ✅ सिर्फ error को ही assign करो
+		if err != nil {
+			logrus.Error("Failed to create doctor: ", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create doctor"})
+		}
+
+		return c.JSON(http.StatusCreated, map[string]string{"message": "Doctor created successfully"}) // ✅ Success Response
 	}
-}
-
-func (d *DoctorHandler) CreateDoctor(c echo.Context) error {
-	var doctor models.DoctorList
-	err := c.Bind(&doctor)
-
-	if err != nil {
-		logrus.Error("Failed to bind doctor data: ", err)
-		return err
-	}
-	logrus.WithFields(logrus.Fields{
-		"doctor": doctor,
-	}).Info("Doctor created successfully")
-	return c.JSON(http.StatusCreated, doctor)
-}
-
-func (d *DoctorHandler) GetDoctor(c echo.Context) error {
-	return nil
-}
-func (d *DoctorHandler) DeleteDoctor(c echo.Context) error {
-	return nil
-}
-
-func (d *DoctorHandler) UpdateDoctor(c echo.Context) error {
-	return nil
 }

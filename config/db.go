@@ -9,19 +9,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoDB *mongo.Database
-
-func ConnectDB() {
+func ConnectDB() *mongo.Database {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal("MongoDB Connection Error:", err)
-	} else {
-		log.Println("MongoDB Connected")
+		log.Fatal("Error connecting to MongoDB:", err)
 	}
 
-	MongoDB = client.Database("Health-Care")
+	// Ping to verify connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx, nil); err != nil {
+		log.Fatal("Could not ping MongoDB:", err)
+	}
+
+	log.Println("Connected to MongoDB!")
+
+	return client.Database("Health-Care") // ✅ अब यह *mongo.Database रिटर्न कर रहा है।
 }

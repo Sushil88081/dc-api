@@ -3,95 +3,43 @@ package repository
 import (
 	"context"
 	"doctor-on-demand/models"
-	"errors"
-	"log"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type IDoctorRepository interface {
-	CreateDoctor(user models.DoctorList) error
-	GetDoctorByID(id string) (*models.DoctorList, error)
-	UpdateDoctor(id string, userData map[string]interface{}) error
-	DeleteDoctor(id string) error
+	CreateDoctor(ctx context.Context, doctor models.DoctorList) error
+	GetDoctor(ctx context.Context, id string) (models.DoctorList, error)
+	UpdateDoctor(ctx context.Context, id string, doctor models.DoctorList) error
+	DeleteDoctor(ctx context.Context, id string) error // ✅ यह method add करो
 }
 
 type DoctorRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) IDoctorRepository {
-	return &DoctorRepository{
-		collection: db.Collection("Doctors"),
-	}
+func NewDoctorRepository(collection *mongo.Collection) *DoctorRepository {
+	return &DoctorRepository{collection: collection}
 }
 
-func (r *DoctorRepository) CreateDoctor(user models.DoctorList) error {
-	_, err := r.collection.InsertOne(context.Background(), user)
+func (r *DoctorRepository) CreateDoctor(ctx context.Context, doctor models.DoctorList) error {
+	_, err := r.collection.InsertOne(ctx, doctor)
 	return err
 }
-func (r *DoctorRepository) GetDoctorByID(id string) (*models.DoctorList, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, errors.New("invalid doctor ID")
-	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	var user models.DoctorList
-	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
-	if err == mongo.ErrNoDocuments {
-		return nil, errors.New("doctor not found")
-	} else if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+func (r *DoctorRepository) GetDoctor(ctx context.Context, id string) (models.DoctorList, error) {
+	var doctor models.DoctorList
+	err := r.collection.FindOne(ctx, id).Decode(&doctor)
+	return doctor, err
 }
 
-// 🔹 Update user (partial update)
-func (r *DoctorRepository) UpdateDoctor(id string, userData map[string]interface{}) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return errors.New("invalid doctor ID")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	updateData := bson.M{"$set": userData}
-	_, err = r.collection.UpdateOne(ctx, bson.M{"_id": objectID}, updateData)
-	if err != nil {
-		log.Println("UpdateDoctor Error:", err)
-		return err
-	}
-
-	return nil
+func (r *DoctorRepository) UpdateDoctor(ctx context.Context, id string, doctor models.DoctorList) error {
+	_, err := r.collection.UpdateOne(ctx, id, doctor)
+	return err
 }
 
-// 🔹 Delete user
-func (r *DoctorRepository) DeleteDoctor(id string) error {
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return errors.New("invalid user ID")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	result, err := r.collection.DeleteOne(ctx, bson.M{"_id": objectID})
-	if err != nil {
-		log.Println("Delete Doctor Error:", err)
-		return err
-	}
-
-	if result.DeletedCount == 0 {
-		return errors.New("Doctor not found")
-	}
-
-	return nil
+// ✅ अब `DeleteDoctor` को implement किया:
+func (r *DoctorRepository) DeleteDoctor(ctx context.Context, id string) error {
+	_, err := r.collection.DeleteOne(ctx, id)
+	return err
 }
