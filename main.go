@@ -13,10 +13,11 @@ func main() {
 	// Initialize Echo instance
 	e := echo.New()
 	db := config.ConnectDB()
-	doctorCollection := db.Collection("Doctors")
-	doctorRepo := repository.NewDoctorRepository(doctorCollection)
+
+	doctorRepo := repository.NewDoctorRepository(db)
 	doctorHandler := handlers.NewDoctorHandler(doctorRepo)
 	routes.Routes(e, doctorHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
+	defer db.Close()
 }

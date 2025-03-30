@@ -11,7 +11,7 @@ import (
 
 type Idoctor interface {
 	Create() echo.HandlerFunc
-	Get() echo.HandlerFunc
+	GetById() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	Update() echo.HandlerFunc
 }
@@ -32,12 +32,25 @@ func (d *DoctorHandler) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 		}
 
-		err := d.repo.CreateDoctor(c.Request().Context(), req) // ✅ सिर्फ error को ही assign करो
+		err := d.repo.CreateDoctor(c.Request().Context(), req)
 		if err != nil {
 			logrus.Error("Failed to create doctor: ", err)
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create doctor"})
 		}
 
 		return c.JSON(http.StatusCreated, map[string]string{"message": "Doctor created successfully"}) // ✅ Success Response
+	}
+}
+
+func (d *DoctorHandler) GetById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+		logrus.Info("request received for id", id)
+
+		doctor, err := d.repo.GetByID(c.Request().Context(), id)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get doctor"})
+		}
+		return c.JSON(http.StatusOK, doctor)
 	}
 }

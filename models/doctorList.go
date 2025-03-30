@@ -1,8 +1,12 @@
 package models
 
+import "time"
+
 type DoctorList struct {
-	ID          string `bson:"id,omitempty"`
-	Name        string `bson:"name" json:"name"`
-	Email       string `bson:"email" json:"email`
-	Designation string `bson:"designation" json:"designation"`
+	ID             int       `db:"id" json:"id"`
+	Name           string    `db:"name" json:"name"`
+	Specialization string    `db:"specialization" json:"specialization"`
+	Phone          string    `db:"phone" json:"phone"`
+	Email          string    `db:"email" json:"email"`
+	CreatedAt      time.Time `db:"created_at" json:"created_at"`
 }

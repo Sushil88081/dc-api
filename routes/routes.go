@@ -8,7 +8,7 @@ import (
 
 func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
 	e.POST("/doctors", DoctorHandler.Create())
-	// e.GET("/users/:id", DoctorHandler.)
+	e.GET("/doctor/:id", DoctorHandler.GetById())
 	// e.PUT("/users/:id", DoctorHandler.UpdateDoctor)
 	// e.DELETE("/users/:id", DoctorHandler.DeleteDoctor)
 }

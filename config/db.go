@@ -1,29 +1,21 @@
 package config
 
 import (
-	"context"
 	"log"
-	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 )
 
-func ConnectDB() *mongo.Database {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+const DBURL = "postgres://postgres:root@localhost:5432/postgres?sslmode=disable"
+
+func ConnectDB() *sqlx.DB {
+	db, err := sqlx.Connect("postgres", DBURL)
 	if err != nil {
-		log.Fatal("Error connecting to MongoDB:", err)
+		log.Fatalf("Error connecting to database %v", err)
+	} else {
+		logrus.Info("Database connected  successfully")
 	}
-
-	// Ping to verify connection
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := client.Ping(ctx, nil); err != nil {
-		log.Fatal("Could not ping MongoDB:", err)
-	}
-
-	log.Println("Connected to MongoDB!")
-
-	return client.Database("Health-Care") // ✅ अब यह *mongo.Database रिटर्न कर रहा है।
+	return db
 }
