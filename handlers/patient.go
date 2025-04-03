@@ -42,17 +42,39 @@ func (p *PatientHandler) GetById() echo.HandlerFunc {
 }
 func (p *PatientHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return nil
+		patient := models.Patient{}
+		if err := c.Bind(&patient); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		err := p.repo.Create(c.Request().Context(), patient)
+		if err != nil {
+			logrus.Error("error creating patient", err)
+		}
+		return c.JSON(http.StatusCreated, patient)
 	}
 }
 func (p *PatientHandler) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return nil
+		id := c.Param("id")
+		patient := models.Patient{}
+		if err := c.Bind(&patient); err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+		err := p.repo.Update(c.Request().Context(), id, patient)
+		if err != nil {
+			logrus.Error("error updating patient", err)
+		}
+		return c.JSON(http.StatusOK, patient)
 	}
 }
 
 func (p *PatientHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return nil
+		id := c.Param("id")
+		err := p.repo.Delete(c.Request().Context(), id)
+		if err != nil {
+			logrus.Error("error deleting patient", err)
+		}
+		return c.NoContent(http.StatusOK)
 	}
 }

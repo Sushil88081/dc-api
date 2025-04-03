@@ -35,11 +35,33 @@ func (r *PatientRepository) GetById(ctx context.Context, id string) (models.Pati
 }
 
 func (r *PatientRepository) Create(ctx context.Context, patient models.Patient) error {
-	return nil
+	query := `INSERT INTO patients (id,name,age,phone,email)
+	       VALUES($1, $2, $3, $4, $5)`
+
+	_, err := r.db.Exec(query, patient.ID, patient.Name, patient.Age, patient.Phone, patient.Email)
+	if err != nil {
+		logrus.Info("Error creating patient", err)
+
+	}
+
+	return err
 }
 func (r *PatientRepository) Update(ctx context.Context, id string, patient models.Patient) error {
-	return nil
+
+	query := `UPDATE patients SET name = $2, age =$3, phone=$4, email=$5 WHERE id=$1`
+	_, err := r.db.Exec(query, patient.ID, patient.Name, patient.Age, patient.Phone, patient.Email)
+	if err != nil {
+		logrus.Info("Error updating patient", err)
+
+	}
+	return err
 }
 func (r *PatientRepository) Delete(ctx context.Context, id string) error {
-	return nil
+
+	query := `DELETE FROM patients WHERE id=$1`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		logrus.Info("error deleting patient", err)
+	}
+	return err
 }
