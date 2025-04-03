@@ -16,7 +16,10 @@ func main() {
 
 	doctorRepo := repository.NewDoctorRepository(db)
 	doctorHandler := handlers.NewDoctorHandler(doctorRepo)
+	patientRepo := repository.NewPatientRepository(db)
+	patientHandler := handlers.NewPatientHandler(patientRepo)
 	routes.Routes(e, doctorHandler)
+	routes.PatientRoutes(e, patientHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 	defer db.Close()

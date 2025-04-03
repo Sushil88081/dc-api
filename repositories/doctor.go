@@ -33,7 +33,7 @@ func (r *DoctorRepository) CreateDoctor(ctx context.Context, doctor models.Docto
 func (r *DoctorRepository) GetByID(ctx context.Context, id string) (models.DoctorList, error) {
 	var doctor models.DoctorList
 	query := `SELECT * FROM doctors WHERE id =$1;`
-	err := r.db.Get(&doctor, query, id)
+	err := r.db.GetContext(ctx, &doctor, query, id)
 	if err != nil {
 		logrus.Info("error getting doctor")
 	} else if id == "" {
