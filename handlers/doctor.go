@@ -14,6 +14,7 @@ type Idoctor interface {
 	GetById() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	Update() echo.HandlerFunc
+	GetAll() echo.HandlerFunc
 }
 
 type DoctorHandler struct {
@@ -85,5 +86,15 @@ func (d *DoctorHandler) Delete() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be provided"})
 		}
 		return c.JSON(http.StatusOK, map[string]string{"message": "Doctor deleted successfully"}) // ✅ Success Response
+	}
+}
+
+func (d *DoctorHandler) GetAll() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		result, err := d.repo.GetAll(c.Request().Context())
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get doctors"})
+		}
+		return c.JSON(http.StatusOK, result)
 	}
 }

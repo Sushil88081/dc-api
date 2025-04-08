@@ -11,6 +11,8 @@ func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
 	e.GET("/doctor/:id", DoctorHandler.GetById())
 	e.PUT("/doctor/:id", DoctorHandler.Update())
 	e.DELETE("/doctor/:id", DoctorHandler.Delete())
+	e.GET("/doctors", DoctorHandler.GetAll())
+
 }
 
 func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
@@ -18,4 +20,11 @@ func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
 	e.POST("/patient", patientHandler.Create())
 	e.PUT("/patient/:id", patientHandler.Update())
 	e.DELETE("/patient/:id", patientHandler.Delete())
+}
+
+func AppointmentRoutes(e *echo.Echo, appointmentHandler *handlers.AppointementHandler) {
+	//  e.GET("/appointment/:id", appointmentHandler.GetById())
+	e.POST("/appointment", appointmentHandler.Create())
+	// e.PUT("/appointment/:id", appointmentHandler.Update())
+	// e.DELETE("/appointment/:id", appointmentHandler.Delete())
 }

@@ -14,6 +14,7 @@ type IDoctorRepository interface {
 	GetByID(ctx context.Context, id string) (models.DoctorList, error)
 	UpdateDoctor(ctx context.Context, id string, doctor models.DoctorList) error
 	DeleteDoctor(ctx context.Context, id string) error // ✅ यह method add करो
+	GetAll(ctx context.Context) ([]models.DoctorList, error)
 }
 
 type DoctorRepository struct {
@@ -59,4 +60,14 @@ func (r *DoctorRepository) DeleteDoctor(ctx context.Context, id string) error {
 	_, err := r.db.Exec(query, id)
 	return err
 
+}
+
+func (r *DoctorRepository) GetAll(ctx context.Context) ([]models.DoctorList, error) {
+	var doctors []models.DoctorList
+	query := `SELECT * FROM doctors;`
+	err := r.db.SelectContext(ctx, &doctors, query)
+	if err != nil {
+		logrus.Info("Eror fetching the doctors from the database")
+	}
+	return doctors, err
 }
