@@ -15,6 +15,7 @@ type IDoctorRepository interface {
 	UpdateDoctor(ctx context.Context, id string, doctor models.DoctorList) error
 	DeleteDoctor(ctx context.Context, id string) error // ✅ यह method add करो
 	GetAll(ctx context.Context) ([]models.DoctorList, error)
+	Count(ctx context.Context) (int, error)
 }
 
 type DoctorRepository struct {
@@ -26,8 +27,8 @@ func NewDoctorRepository(db *sqlx.DB) *DoctorRepository {
 }
 
 func (r *DoctorRepository) CreateDoctor(ctx context.Context, doctor models.DoctorList) error {
-	query := `INSERT INTO doctors(name,specialization, phone, email) VALUES($1, $2, $3, $4)`
-	_, err := r.db.Exec(query, doctor.Name, doctor.Specialization, doctor.Phone, doctor.Email)
+	query := `INSERT INTO doctors(name,specialization, phone, email,image,fee,availability,schedule) VALUES($1, $2, $3, $4,$5,$6,$7,$8)`
+	_, err := r.db.Exec(query, doctor.Name, doctor.Specialization, doctor.Phone, doctor.Email, doctor.ImageUrl, doctor.Fee, doctor.Availability, doctor.Schedule)
 	return err
 }
 
@@ -45,8 +46,8 @@ func (r *DoctorRepository) GetByID(ctx context.Context, id string) (models.Docto
 }
 
 func (r *DoctorRepository) UpdateDoctor(ctx context.Context, id string, doctor models.DoctorList) error {
-	query := `UPDATE doctors SET name = $1, email = $2, specialization =$3, phone=$4 WHERE id = $5`
-	_, err := r.db.Exec(query, doctor.Name, doctor.Email, doctor.Specialization, doctor.Phone, id)
+	query := `UPDATE doctors SET name = $1, email = $2, specialization =$3, phone=$4 ,availability=$5,fee=$6,image=$7,Schedule=$8 WHERE id = $9`
+	_, err := r.db.Exec(query, doctor.Name, doctor.Email, doctor.Specialization, doctor.Phone, doctor.Availability, doctor.Fee, doctor.ImageUrl, doctor.Schedule, id)
 	if err != nil {
 		return fmt.Errorf("failed to update doctor: %w", err)
 
@@ -70,4 +71,16 @@ func (r *DoctorRepository) GetAll(ctx context.Context) ([]models.DoctorList, err
 		logrus.Info("Eror fetching the doctors from the database")
 	}
 	return doctors, err
+}
+
+func (r *DoctorRepository) Count(ctx context.Context) (int, error) {
+	query := `SELECT COUNT(*) FROM doctors;`
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

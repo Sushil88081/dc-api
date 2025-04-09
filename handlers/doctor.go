@@ -15,6 +15,7 @@ type Idoctor interface {
 	Delete() echo.HandlerFunc
 	Update() echo.HandlerFunc
 	GetAll() echo.HandlerFunc
+	Count() echo.HandlerFunc
 }
 
 type DoctorHandler struct {
@@ -78,22 +79,45 @@ func (d *DoctorHandler) Update() echo.HandlerFunc {
 func (d *DoctorHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
-		logrus.Info("request received for id", id)
-		err := d.repo.DeleteDoctor(c.Request().Context(), id)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete doctor"})
-		} else if id == "" {
+		logrus.Info("request received for id ", id) // Added space after "id"
+
+		// Validate ID first
+		if id == "" {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be provided"})
 		}
-		return c.JSON(http.StatusOK, map[string]string{"message": "Doctor deleted successfully"}) // ✅ Success Response
+
+		// Then attempt deletion
+		err := d.repo.DeleteDoctor(c.Request().Context(), id)
+		if err != nil {
+			logrus.WithError(err).Error("failed to delete doctor") // Better error logging
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Failed to delete doctor",
+				// Consider adding more details if appropriate for your API:
+				// "details": err.Error()
+			})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{
+			"message": "Doctor deleted successfully",
+			"id":      id, // Echo back the deleted ID for confirmation
+		})
 	}
 }
-
 func (d *DoctorHandler) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		result, err := d.repo.GetAll(c.Request().Context())
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get doctors"})
+		}
+		return c.JSON(http.StatusOK, result)
+	}
+}
+
+func (d *DoctorHandler) Count() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		result, err := d.repo.Count(c.Request().Context())
+		if err != nil {
+			logrus.Info("Error getting the count of doctors", err)
 		}
 		return c.JSON(http.StatusOK, result)
 	}

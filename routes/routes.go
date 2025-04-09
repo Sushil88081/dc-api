@@ -12,6 +12,7 @@ func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
 	e.PUT("/doctor/:id", DoctorHandler.Update())
 	e.DELETE("/doctor/:id", DoctorHandler.Delete())
 	e.GET("/doctors", DoctorHandler.GetAll())
+	e.GET("/doctorCount", DoctorHandler.Count())
 
 }
 

@@ -7,11 +7,13 @@ import (
 	"doctor-on-demand/routes"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func main() {
 	// Initialize Echo instance
 	e := echo.New()
+	e.Use(middleware.CORS())
 	db := config.ConnectDB()
 	//doctor reppo initialization
 	doctorRepo := repository.NewDoctorRepository(db)
@@ -26,6 +28,11 @@ func main() {
 	routes.PatientRoutes(e, patientHandler)
 	routes.AppointmentRoutes(e, appointmentHandler)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start("0.0.0.0:8080"))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"}, // You can restrict this later
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+	}))
 	defer db.Close()
 }
