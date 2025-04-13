@@ -16,12 +16,12 @@ func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
 
 }
 
-// func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
-// 	e.GET("/patient/:id", patientHandler.GetById())
-// 	e.POST("/patient", patientHandler.Create())
-// 	e.PUT("/patient/:id", patientHandler.Update())
-// 	e.DELETE("/patient/:id", patientHandler.Delete())
-// }
+func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
+	e.GET("/patient/:id", patientHandler.GetById())
+	e.POST("/patient", patientHandler.Create())
+	e.PUT("/patient/:id", patientHandler.Update())
+	e.DELETE("/patient/:id", patientHandler.Delete())
+}
 
 // func AppointmentRoutes(e *echo.Echo, appointmentHandler *handlers.AppointementHandler) {
 // 	//  e.GET("/appointment/:id", appointmentHandler.GetById())

@@ -35,8 +35,8 @@ func main() {
 	doctorRepo := repository.NewDoctorRepository(db)
 	doctorHandler := handlers.NewDoctorHandler(doctorRepo)
 
-	// patientRepo := repository.NewPatientRepository(db)
-	// patientHandler := handlers.NewPatientHandler(patientRepo)
+	patientRepo := repository.NewPatientRepository(db)
+	patientHandler := handlers.NewPatientHandler(patientRepo)
 
 	// appointmentRepo := repository.NewAppointmentRepository(db)
 	// appointmentHandler := handlers.NewAppointementHandler(*appointmentRepo)
@@ -46,7 +46,7 @@ func main() {
 
 	// Define Routes
 	routes.Routes(e, doctorHandler)
-	// routes.PatientRoutes(e, patientHandler)
+	routes.PatientRoutes(e, patientHandler)
 	// routes.AppointmentRoutes(e, appointmentHandler)
 	// routes.DoctorSchedule(e, scheduleHandler)
 

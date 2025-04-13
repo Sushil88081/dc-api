@@ -1,12 +1,9 @@
 package models
 
-import "time"
-
 type Patient struct {
-	ID        int       `db:"id" json:"id"`
-	Name      string    `db:"name" json:"name" `
-	Age       int       `db:"age" json:"age"`
-	Phone     int       `db:"phone" json:"phone"`
-	Email     string    `db:"email" json:"email" `
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name  string `gorm:"type:varchar(100);not null" json:"name"`
+	Age   int    `gorm:"not null" json:"age"`
+	Phone string `gorm:"type:varchar(15);not null" json:"phone"` // string is preferred for phone numbers
+	Email string `gorm:"type:varchar(100);unique;not null" json:"email"`
 }
