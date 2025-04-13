@@ -15,6 +15,7 @@ type IPatient interface {
 	Create() echo.HandlerFunc
 	Update() echo.HandlerFunc
 	Delete() echo.HandlerFunc
+	GetAll() echo.HandlerFunc
 }
 
 type PatientHandler struct {
@@ -98,5 +99,16 @@ func (p *PatientHandler) Delete() echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, "Failed to delete patient")
 		}
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+func (p *PatientHandler) GetAll() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		result, err := p.repo.GetAll(c.Request().Context())
+		if err != nil {
+			logrus.Error("Error getting patients: ", err)
+		}
+		return c.JSON(http.StatusOK, result)
 	}
 }

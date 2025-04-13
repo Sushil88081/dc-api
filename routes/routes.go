@@ -17,6 +17,7 @@ func Routes(e *echo.Echo, DoctorHandler *handlers.DoctorHandler) {
 }
 
 func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
+	e.GET("/patients", patientHandler.GetAll())
 	e.GET("/patient/:id", patientHandler.GetById())
 	e.POST("/patient", patientHandler.Create())
 	e.PUT("/patient/:id", patientHandler.Update())

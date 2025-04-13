@@ -12,6 +12,7 @@ type IPatientRepository interface {
 	Create(ctx context.Context, patient *models.Patient) error
 	Update(ctx context.Context, id uint, patient *models.Patient) error
 	Delete(ctx context.Context, id uint) error
+	GetAll(ctx context.Context) ([]models.Patient, error)
 }
 
 type PatientRepository struct {
@@ -39,4 +40,9 @@ func (r *PatientRepository) Update(ctx context.Context, id uint, patient *models
 
 func (r *PatientRepository) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&models.Patient{}, id).Error
+}
+func (r *PatientRepository) GetAll(ctx context.Context) ([]models.Patient, error) {
+	var patients []models.Patient
+	err := r.db.WithContext(ctx).Find(&patients).Error
+	return patients, err
 }
