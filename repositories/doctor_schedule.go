@@ -9,17 +9,18 @@ import (
 )
 
 type IDoctorScheduleRepository interface {
-	GetByID(ctx context.Context, id string) (models.DoctorSchedule, error)
+	// GetByID(ctx context.Context, id string) (models.DoctorSchedule, error)
 	Create(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error)
-	Update(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error)
-	Delete(ctx context.Context, id string) error
+	// Update(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error)
+	// Delete(ctx context.Context, id string) error
+	// GetByDoctorId(ctx context.Context, doctor_id string) models.DoctorSchedule
 }
 
 type DoctorScheduleRepository struct {
-	db sqlx.DB
+	db *sqlx.DB
 }
 
-func NewDoctorScheduleRepository(db sqlx.DB) *DoctorScheduleRepository {
+func NewDoctorScheduleRepository(db *sqlx.DB) *DoctorScheduleRepository {
 	return &DoctorScheduleRepository{db: db}
 }
 

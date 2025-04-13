@@ -1,16 +1,23 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type DoctorList struct {
-	ID             int       `db:"id" json:"id"`
-	Name           string    `db:"name" json:"name"`
-	Specialization string    `db:"specialization" json:"specialization"`
-	Phone          string    `db:"phone" json:"phone"`
-	Email          string    `db:"email" json:"email"`
-	ImageUrl       string    `db:"image" json:"image"`
-	Availability   string    `db:"availability" json:"availability"`
-	Fee            int       `db:"fee" json:"fee"`
-	Schedule       time.Time `db:"schedule" json:"schedule"`
-	CreatedAt      time.Time `db:"created_at" json:"created_at"`
+	ID             string    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name           string    `gorm:"type=varchar(100);not null" json:"name"`
+	Specialization string    `gorm:"type=varchar(100);not null" json:"specialization"`
+	Phone          string    `gorm:"type=varchar(20);not null;unique" json:"phone"`
+	Email          string    `gorm:"type=varchar(100);not null;unique" json:"email"`
+	Image          string    `gorm:"type=text" json:"image"`
+	Availability   string    `gorm:"type=varchar(50)" json:"availability"`
+	Fee            int       `gorm:"type=int;not null" json:"fee"`
+	Schedule       time.Time `gorm:"type=timestamp without time zone" json:"schedule"`
+	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
+}
+
+// TableName to map model to "doctors" table
+func (DoctorList) TableName() string {
+	return "doctors"
 }

@@ -34,13 +34,13 @@ func (d *DoctorHandler) Create() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 		}
 
-		err := d.repo.CreateDoctor(c.Request().Context(), req)
+		err := d.repo.CreateDoctor(c.Request().Context(), &req)
 		if err != nil {
 			logrus.Error("Failed to create doctor: ", err)
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create doctor"})
 		}
 
-		return c.JSON(http.StatusCreated, map[string]string{"message": "Doctor created successfully"}) // ✅ Success Response
+		return c.JSON(http.StatusCreated, map[string]string{"message": "Doctor created successfully"})
 	}
 }
 
@@ -68,45 +68,44 @@ func (d *DoctorHandler) Update() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
 		}
 
-		err := d.repo.UpdateDoctor(c.Request().Context(), id, req)
+		err := d.repo.UpdateDoctor(c.Request().Context(), id, &req)
 		if err != nil {
-			return err
+			logrus.Error("Failed to update doctor: ", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update doctor"})
 		}
-		return c.JSON(http.StatusOK, map[string]string{"message": "Doctor updated successfully"}) // ✅ Success Response
+		return c.JSON(http.StatusOK, map[string]string{"message": "Doctor updated successfully"})
 	}
 }
 
 func (d *DoctorHandler) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
-		logrus.Info("request received for id ", id) // Added space after "id"
+		logrus.Info("request received for id ", id)
 
-		// Validate ID first
 		if id == "" {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be provided"})
 		}
 
-		// Then attempt deletion
 		err := d.repo.DeleteDoctor(c.Request().Context(), id)
 		if err != nil {
-			logrus.WithError(err).Error("failed to delete doctor") // Better error logging
+			logrus.WithError(err).Error("failed to delete doctor")
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "Failed to delete doctor",
-				// Consider adding more details if appropriate for your API:
-				// "details": err.Error()
 			})
 		}
 
 		return c.JSON(http.StatusOK, map[string]string{
 			"message": "Doctor deleted successfully",
-			"id":      id, // Echo back the deleted ID for confirmation
+			"id":      id,
 		})
 	}
 }
+
 func (d *DoctorHandler) GetAll() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		result, err := d.repo.GetAll(c.Request().Context())
 		if err != nil {
+			logrus.Error("Failed to get doctors: ", err)
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get doctors"})
 		}
 		return c.JSON(http.StatusOK, result)
@@ -118,6 +117,7 @@ func (d *DoctorHandler) Count() echo.HandlerFunc {
 		result, err := d.repo.Count(c.Request().Context())
 		if err != nil {
 			logrus.Info("Error getting the count of doctors", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to count doctors"})
 		}
 		return c.JSON(http.StatusOK, result)
 	}
