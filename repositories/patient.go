@@ -13,6 +13,7 @@ type IPatientRepository interface {
 	Update(ctx context.Context, id uint, patient *models.Patient) error
 	Delete(ctx context.Context, id uint) error
 	GetAll(ctx context.Context) ([]models.Patient, error)
+	Count(ctx context.Context) error
 }
 
 type PatientRepository struct {
@@ -45,4 +46,10 @@ func (r *PatientRepository) GetAll(ctx context.Context) ([]models.Patient, error
 	var patients []models.Patient
 	err := r.db.WithContext(ctx).Find(&patients).Error
 	return patients, err
+}
+
+func (r *PatientRepository) Count(ctx context.Context) error {
+	var count int64
+	return r.db.WithContext(ctx).Model(&models.Patient{}).Count(&count).Error
+
 }

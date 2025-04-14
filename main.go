@@ -14,10 +14,10 @@ import (
 func main() {
 	// Initialize Echo instance
 	e := echo.New()
-
+	e.Use(middleware.CORS())
 	// Middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"}, // Restrict this in production
+		AllowOrigins: []string{"*"}, // You can restrict this later
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
 	}))
 

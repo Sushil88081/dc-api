@@ -51,6 +51,9 @@ func (r *DoctorRepository) GetAll(ctx context.Context) ([]models.DoctorList, err
 
 func (r *DoctorRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
+	// result := r.db.RowsAffected
+	// fmt.Println(result)
+	// return result, nil
 	err := r.db.WithContext(ctx).Model(&models.DoctorList{}).Count(&count).Error
 	return count, err
 }
