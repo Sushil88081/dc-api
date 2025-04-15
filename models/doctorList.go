@@ -5,7 +5,7 @@ import (
 )
 
 type DoctorList struct {
-	ID             string    `gorm:"primaryKey;autoIncrement" json:"id"`
+	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name           string    `gorm:"type=varchar(100);not null" json:"name"`
 	Specialization string    `gorm:"type=varchar(100);not null" json:"specialization"`
 	Phone          string    `gorm:"type=varchar(20);not null;unique" json:"phone"`

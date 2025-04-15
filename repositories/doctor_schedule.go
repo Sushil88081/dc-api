@@ -3,35 +3,128 @@ package repository
 import (
 	"context"
 	"doctor-on-demand/models"
+	"fmt"
+	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
+// DoctorScheduleRepository defines the interface
 type IDoctorScheduleRepository interface {
-	// GetByID(ctx context.Context, id string) (models.DoctorSchedule, error)
-	Create(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error)
-	// Update(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error)
-	// Delete(ctx context.Context, id string) error
-	// GetByDoctorId(ctx context.Context, doctor_id string) models.DoctorSchedule
+	Create(ctx context.Context, schedule models.DoctorSchedule) (models.DoctorSchedule, error)
+	GetByID(ctx context.Context, id uint) (models.DoctorSchedule, error)
+	Update(ctx context.Context, id uint, schedule models.DoctorSchedule) (models.DoctorSchedule, error)
+	Delete(ctx context.Context, id uint) error
+	GetByDoctorID(ctx context.Context, doctorID uint) ([]models.DoctorSchedule, error)
 }
 
-type DoctorScheduleRepository struct {
-	db *sqlx.DB
+// doctorScheduleRepo implements the interface
+type DoctorScheduleRepo struct {
+	db *gorm.DB
 }
 
-func NewDoctorScheduleRepository(db *sqlx.DB) *DoctorScheduleRepository {
-	return &DoctorScheduleRepository{db: db}
+// NewDoctorScheduleRepository creates a new repository instance
+func NewDoctorScheduleRepository(db *gorm.DB) IDoctorScheduleRepository {
+	return &DoctorScheduleRepo{db: db}
 }
 
-func (ds *DoctorScheduleRepository) Create(ctx context.Context, doctor_schedule models.DoctorSchedule) (models.DoctorSchedule, error) {
-	query := `INSERT INTO doctor_schedules(id,doctor_id,day_of_week,start_time,end_time,is_available,created_at) VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id`
-	row, err := ds.db.ExecContext(ctx, query, doctor_schedule.ID, doctor_schedule.DoctorID, doctor_schedule.DayOfWeek, doctor_schedule.StartTime, doctor_schedule.EndTime, doctor_schedule.IsAvailable, doctor_schedule.CreatedAt)
-	if err != nil {
-		logrus.Info("failed in creating doctor schedule", row)
+func (r *DoctorScheduleRepo) Create(ctx context.Context, schedule models.DoctorSchedule) (models.DoctorSchedule, error) {
+	// Ensure times are in UTC
+	schedule.CreatedAt = schedule.CreatedAt.UTC()
+	schedule.UpdatedAt = schedule.UpdatedAt.UTC()
 
+	// Verify doctor exists
+	var doctor models.DoctorList
+	if err := r.db.WithContext(ctx).First(&doctor, schedule.DoctorID).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"doctor_id": schedule.DoctorID,
+			"error":     err,
+		}).Error("Doctor not found")
+		return models.DoctorSchedule{}, fmt.Errorf("doctor with ID %d not found", schedule.DoctorID)
 	}
 
-	return models.DoctorSchedule{}, err
+	// Create the schedule
+	if err := r.db.WithContext(ctx).Create(&schedule).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":    err.Error(),
+			"schedule": schedule,
+		}).Error("Failed to create doctor schedule")
+		return models.DoctorSchedule{}, fmt.Errorf("failed to create schedule: %w", err)
+	}
+
+	// Reload with associated data
+	if err := r.db.WithContext(ctx).
+		Preload("Doctor").
+		First(&schedule, schedule.ID).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"schedule_id": schedule.ID,
+			"error":       err,
+		}).Error("Failed to load schedule with doctor data")
+		return models.DoctorSchedule{}, fmt.Errorf("failed to load created schedule: %w", err)
+	}
+
+	return schedule, nil
+}
+
+// Implement other interface methods similarly
+func (r *DoctorScheduleRepo) GetByID(ctx context.Context, id uint) (models.DoctorSchedule, error) {
+	var schedule models.DoctorSchedule
+	err := r.db.WithContext(ctx).
+		Preload("Doctor").
+		First(&schedule, id).Error
+	if err != nil {
+		return models.DoctorSchedule{}, fmt.Errorf("failed to get schedule: %w", err)
+	}
+	return schedule, nil
+}
+
+func (r *DoctorScheduleRepo) Update(ctx context.Context, id uint, schedule models.DoctorSchedule) (models.DoctorSchedule, error) {
+	// 1. First check if schedule exists
+	var existingSchedule models.DoctorSchedule
+	if err := r.db.WithContext(ctx).First(&existingSchedule, id).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"id":    id,
+		}).Error("Schedule not found")
+		return models.DoctorSchedule{}, fmt.Errorf("schedule not found")
+	}
+
+	// 2. Set the ID from parameter to ensure we update the correct record
+	schedule.ID = id
+
+	// 3. Update timestamps
+	schedule.UpdatedAt = time.Now().UTC()
+
+	// 4. Perform the update
+	if err := r.db.WithContext(ctx).Model(&models.DoctorSchedule{}).
+		Where("id = ?", id).
+		Updates(&schedule).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"id":    id,
+		}).Error("Failed to update schedule")
+		return models.DoctorSchedule{}, fmt.Errorf("failed to update schedule")
+	}
+
+	// 5. Fetch the updated record with relationships
+	if err := r.db.WithContext(ctx).Preload("Doctor").First(&schedule, id).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+			"id":    id,
+		}).Error("Failed to fetch updated schedule")
+		return models.DoctorSchedule{}, fmt.Errorf("failed to fetch updated schedule")
+	}
+
+	return schedule, nil
+}
+
+func (r *DoctorScheduleRepo) Delete(ctx context.Context, id uint) error {
+	// Implementation here
+	return nil
+}
+
+func (r *DoctorScheduleRepo) GetByDoctorID(ctx context.Context, doctorID uint) ([]models.DoctorSchedule, error) {
+	// Implementation here
+	return []models.DoctorSchedule{}, nil
 }

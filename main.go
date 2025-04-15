@@ -41,14 +41,14 @@ func main() {
 	// appointmentRepo := repository.NewAppointmentRepository(db)
 	// appointmentHandler := handlers.NewAppointementHandler(*appointmentRepo)
 
-	// scheduleRepo := repository.NewDoctorScheduleRepository(db)
-	// scheduleHandler := handlers.NewDoctorScheduleHandler(scheduleRepo)
+	scheduleRepo := repository.NewDoctorScheduleRepository(db)
+	scheduleHandler := handlers.NewDoctorScheduleHandler(scheduleRepo)
 
 	// Define Routes
 	routes.Routes(e, doctorHandler)
 	routes.PatientRoutes(e, patientHandler)
 	// routes.AppointmentRoutes(e, appointmentHandler)
-	// routes.DoctorSchedule(e, scheduleHandler)
+	routes.DoctorSchedule(e, scheduleHandler)
 
 	// Start server
 	e.Logger.Fatal(e.Start("0.0.0.0:8080"))

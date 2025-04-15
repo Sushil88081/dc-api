@@ -31,6 +31,8 @@ func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
 // 	// e.DELETE("/appointment/:id", appointmentHandler.Delete())
 // }
 
-// func DoctorSchedule(e *echo.Echo, ScheduleHandler *handlers.DoctorScheduleHandler) {
-// 	e.POST("/schedule", ScheduleHandler.Create())
-// }
+func DoctorSchedule(e *echo.Echo, ScheduleHandler *handlers.DoctorScheduleHandler) {
+	e.POST("/schedule", ScheduleHandler.Create())
+	e.GET("/:id", ScheduleHandler.GetByID())
+	e.PUT("/:id", ScheduleHandler.Update())
+}

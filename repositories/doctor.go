@@ -9,9 +9,9 @@ import (
 
 type IDoctorRepository interface {
 	CreateDoctor(ctx context.Context, doctor *models.DoctorList) error
-	GetByID(ctx context.Context, id string) (models.DoctorList, error)
-	UpdateDoctor(ctx context.Context, id string, doctor *models.DoctorList) error
-	DeleteDoctor(ctx context.Context, id string) error
+	GetByID(ctx context.Context, id uint) (models.DoctorList, error)
+	UpdateDoctor(ctx context.Context, id uint, doctor *models.DoctorList) error
+	DeleteDoctor(ctx context.Context, id uint) error
 	GetAll(ctx context.Context) ([]models.DoctorList, error)
 	Count(ctx context.Context) (int64, error)
 }
@@ -28,18 +28,18 @@ func (r *DoctorRepository) CreateDoctor(ctx context.Context, doctor *models.Doct
 	return r.db.WithContext(ctx).Create(doctor).Error
 }
 
-func (r *DoctorRepository) GetByID(ctx context.Context, id string) (models.DoctorList, error) {
+func (r *DoctorRepository) GetByID(ctx context.Context, id uint) (models.DoctorList, error) {
 	var doctor models.DoctorList
 	err := r.db.WithContext(ctx).First(&doctor, id).Error
 	return doctor, err
 }
 
-func (r *DoctorRepository) UpdateDoctor(ctx context.Context, id string, doctor *models.DoctorList) error {
+func (r *DoctorRepository) UpdateDoctor(ctx context.Context, id uint, doctor *models.DoctorList) error {
 	doctor.ID = id // GORM needs ID for Save
 	return r.db.WithContext(ctx).Save(doctor).Error
 }
 
-func (r *DoctorRepository) DeleteDoctor(ctx context.Context, id string) error {
+func (r *DoctorRepository) DeleteDoctor(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Delete(&models.DoctorList{}, id).Error
 }
 
