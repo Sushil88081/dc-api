@@ -32,6 +32,7 @@ func (r *DoctorRepository) GetByID(ctx context.Context, id uint) (models.DoctorL
 	var doctor models.DoctorList
 	err := r.db.WithContext(ctx).First(&doctor, id).Error
 	return doctor, err
+
 }
 
 func (r *DoctorRepository) UpdateDoctor(ctx context.Context, id uint, doctor *models.DoctorList) error {

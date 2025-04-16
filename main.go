@@ -2,9 +2,7 @@ package main
 
 import (
 	"doctor-on-demand/config"
-	"doctor-on-demand/handlers"
-	repository "doctor-on-demand/repositories"
-	"doctor-on-demand/routes"
+	"doctor-on-demand/initializers"
 	"log"
 
 	"github.com/labstack/echo"
@@ -31,24 +29,8 @@ func main() {
 	}
 	defer sqlDB.Close()
 
-	// Initialize repositories and handlers
-	doctorRepo := repository.NewDoctorRepository(db)
-	doctorHandler := handlers.NewDoctorHandler(doctorRepo)
-
-	patientRepo := repository.NewPatientRepository(db)
-	patientHandler := handlers.NewPatientHandler(patientRepo)
-
-	// appointmentRepo := repository.NewAppointmentRepository(db)
-	// appointmentHandler := handlers.NewAppointementHandler(*appointmentRepo)
-
-	scheduleRepo := repository.NewDoctorScheduleRepository(db)
-	scheduleHandler := handlers.NewDoctorScheduleHandler(scheduleRepo)
-
-	// Define Routes
-	routes.Routes(e, doctorHandler)
-	routes.PatientRoutes(e, patientHandler)
-	// routes.AppointmentRoutes(e, appointmentHandler)
-	routes.DoctorSchedule(e, scheduleHandler)
+	app := initializers.Initializers()
+	app.SetupRoutes(e)
 
 	// Start server
 	e.Logger.Fatal(e.Start("0.0.0.0:8080"))

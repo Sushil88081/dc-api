@@ -109,6 +109,7 @@ func (p *PatientHandler) GetAll() echo.HandlerFunc {
 		if err != nil {
 			logrus.Error("Error getting patients: ", err)
 		}
+
 		return c.JSON(http.StatusOK, result)
 	}
 }
