@@ -1,56 +1,56 @@
 package handlers
 
-// import (
-// 	"doctor-on-demand/models"
-// 	repository "doctor-on-demand/repositories"
-// 	"net/http"
+import (
+	"doctor-on-demand/models"
+	repository "doctor-on-demand/repositories"
+	"net/http"
+	"strings"
 
-// 	"github.com/labstack/echo"
-// 	"github.com/sirupsen/logrus"
-// )
+	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
+)
 
-// type IAppointement interface {
-// 	Create() echo.HandlerFunc
-// 	GetById() echo.HandlerFunc
-// 	Delete() echo.HandlerFunc
-// 	Update() echo.HandlerFunc
-// }
+type IAppointmentHandler interface {
+	Create() echo.HandlerFunc
+}
 
-// type AppointementHandler struct {
-// 	appointement models.Appointment
-// 	repo         repository.AppointmentRepository
-// }
+type AppointmentHandler struct {
+	repo repository.IAppointmentRepository
+}
 
-// func NewAppointementHandler(repo repository.AppointmentRepository) *AppointementHandler {
-// 	return &AppointementHandler{repo: repo}
-// }
+func NewAppointmentHandler(repo repository.IAppointmentRepository) *AppointmentHandler {
+	return &AppointmentHandler{
+		repo: repo,
+	}
+}
+func (h *AppointmentHandler) Create() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var appointment models.Appointment
 
-// func (r *AppointementHandler) Create() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		var appointement models.Appointment
-// 		if err := c.Bind(&appointement); err != nil {
-// 			return c.JSON(http.StatusBadRequest, err)
-// 		}
-// 		result, err := r.repo.Create(c.Request().Context(), appointement)
-// 		if err != nil {
-// 			logrus.Info("Appointement creation failed", err)
-// 		}
-// 		return c.JSON(http.StatusOK, result)
-// 	}
-// }
+		// Bind JSON to struct
+		if err := c.Bind(&appointment); err != nil {
+			logrus.WithField("error", err).Error("Failed to bind appointment")
+			return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request payload"})
+		}
+		appointment.Schedule.DayOfWeek = strings.ToLower(appointment.AppointmentDate.Weekday().String())
+		// Basic field validation
+		if appointment.DoctorID == 0 || appointment.PatientID == 0 {
+			logrus.Error("Doctor ID and Patient ID cannot be zero")
+			return c.JSON(http.StatusBadRequest, echo.Map{"error": "Doctor ID and Patient ID are required"})
+		}
 
-// func (r *AppointementHandler) GetById() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		return nil
-// 	}
-// }
-// func (r *AppointementHandler) Delete() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		return nil
-// 	}
-// }
-// func (r *AppointementHandler) Update() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		return nil
-// 	}
-// }
+		result, err := h.repo.BookAppointment(c.Request().Context(), appointment)
+		if err != nil {
+			logrus.WithField("error", err).Error("Failed to book appointment")
+
+			// Custom error handling
+			if err == repository.ErrScheduleNotAvailable {
+				return c.JSON(http.StatusConflict, echo.Map{"error": "Selected time slot is not available"})
+			}
+
+			return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Could not book appointment"})
+		}
+
+		return c.JSON(http.StatusOK, result)
+	}
+}

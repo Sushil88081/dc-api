@@ -16,6 +16,7 @@ type App struct {
 		Doctor         *handlers.DoctorHandler
 		Patient        *handlers.PatientHandler
 		DoctorSchedule *handlers.DoctorScheduleHandler
+		Appointment    *handlers.AppointmentHandler
 	}
 }
 
@@ -26,16 +27,19 @@ func Initializers() *App {
 	doctorRepo := repository.NewDoctorRepository(db)
 	patientRepo := repository.NewPatientRepository(db)
 	scheduleRepo := repository.NewDoctorScheduleRepository(db)
+	appointmentRepo := repository.NewAppointmentRepository(db)
 	app := &App{
 		DB: db,
 		Handlers: struct {
 			Doctor         *handlers.DoctorHandler
 			Patient        *handlers.PatientHandler
 			DoctorSchedule *handlers.DoctorScheduleHandler
+			Appointment    *handlers.AppointmentHandler
 		}{
 			Doctor:         handlers.NewDoctorHandler(doctorRepo),
 			Patient:        handlers.NewPatientHandler(patientRepo),
 			DoctorSchedule: handlers.NewDoctorScheduleHandler(scheduleRepo),
+			Appointment:    handlers.NewAppointmentHandler(appointmentRepo),
 		},
 	}
 	return app
@@ -44,4 +48,5 @@ func (a *App) SetupRoutes(e *echo.Echo) {
 	routes.Routes(e, a.Handlers.Doctor)
 	routes.PatientRoutes(e, a.Handlers.Patient)
 	routes.DoctorSchedule(e, a.Handlers.DoctorSchedule)
+	routes.AppointmentRoutes(e, a.Handlers.Appointment)
 }

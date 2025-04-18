@@ -1,6 +1,7 @@
 package config
 
 import (
+	"doctor-on-demand/models"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -20,7 +21,15 @@ func ConnectDB() *gorm.DB {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-
+	err = db.AutoMigrate(
+		// &models.Patient{},
+		// &models.DoctorList{},
+		// &models.DoctorSchedule{},
+		&models.Appointment{},
+	)
+	if err != nil {
+		log.Fatal("failed to migrate:", err)
+	}
 	logrus.Info("✅ Connected to PostgreSQL database successfully.")
 	DB = db
 	return db

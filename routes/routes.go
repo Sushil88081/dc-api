@@ -24,15 +24,15 @@ func PatientRoutes(e *echo.Echo, patientHandler *handlers.PatientHandler) {
 	e.DELETE("/patient/:id", patientHandler.Delete())
 }
 
-// func AppointmentRoutes(e *echo.Echo, appointmentHandler *handlers.AppointementHandler) {
-// 	//  e.GET("/appointment/:id", appointmentHandler.GetById())
-// 	e.POST("/appointment", appointmentHandler.Create())
-// 	// e.PUT("/appointment/:id", appointmentHandler.Update())
-// 	// e.DELETE("/appointment/:id", appointmentHandler.Delete())
-// }
+func AppointmentRoutes(e *echo.Echo, appointmentHandler *handlers.AppointmentHandler) {
+	//  e.GET("/appointment/:id", appointmentHandler.GetById())
+	e.POST("/appointment", appointmentHandler.Create())
+	// e.PUT("/appointment/:id", appointmentHandler.Update())
+	// e.DELETE("/appointment/:id", appointmentHandler.Delete())
+}
 
 func DoctorSchedule(e *echo.Echo, ScheduleHandler *handlers.DoctorScheduleHandler) {
 	e.POST("/schedule", ScheduleHandler.Create())
-	e.GET("/:id", ScheduleHandler.GetByID())
-	e.PUT("/:id", ScheduleHandler.Update())
+	e.GET("/schedule/:id", ScheduleHandler.GetByID())
+	e.PUT("/schedule/:id", ScheduleHandler.Update())
 }
