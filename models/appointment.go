@@ -15,7 +15,6 @@ const (
 
 type Appointment struct {
 	gorm.Model
-	AppointmentID   uint      `gorm:"primaryKey;autoIncrement" json:"appointment_id"`
 	PatientID       uint      `gorm:"not null" json:"patient_id"`
 	DoctorID        uint      `gorm:"not null" json:"doctor_id"`
 	AppointmentDate time.Time `gorm:"type:timestamp;not null" json:"appointment_date"`

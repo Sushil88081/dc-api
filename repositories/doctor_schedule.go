@@ -4,7 +4,6 @@ import (
 	"context"
 	"doctor-on-demand/models"
 	"fmt"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -30,9 +29,6 @@ func NewDoctorScheduleRepository(db *gorm.DB) IDoctorScheduleRepository {
 }
 
 func (r *DoctorScheduleRepo) Create(ctx context.Context, schedule models.DoctorSchedule) (models.DoctorSchedule, error) {
-	// Ensure times are in UTC
-	schedule.CreatedAt = schedule.CreatedAt.UTC()
-	schedule.UpdatedAt = schedule.UpdatedAt.UTC()
 
 	// Verify doctor exists
 	var doctor models.DoctorList
@@ -92,9 +88,6 @@ func (r *DoctorScheduleRepo) Update(ctx context.Context, id uint, schedule model
 
 	// 2. Set the ID from parameter to ensure we update the correct record
 	schedule.ID = id
-
-	// 3. Update timestamps
-	schedule.UpdatedAt = time.Now().UTC()
 
 	// 4. Perform the update
 	if err := r.db.WithContext(ctx).Model(&models.DoctorSchedule{}).

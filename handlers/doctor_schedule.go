@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -33,10 +32,7 @@ func NewDoctorScheduleHandler(repo repository.IDoctorScheduleRepository) *Doctor
 
 func (h *DoctorScheduleHandler) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		req := models.DoctorSchedule{
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		}
+		req := models.DoctorSchedule{}
 
 		if err := c.Bind(&req); err != nil {
 			logrus.WithFields(logrus.Fields{

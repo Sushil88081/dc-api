@@ -6,19 +6,20 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type DoctorSchedule struct {
-	ID          uint       `gorm:"primaryKey;autoIncrement" json:"id"`
-	DoctorID    uint       `gorm:"not null" json:"doctor_id"`
-	DayOfWeek   string     `gorm:"type:varchar(10);not null" json:"day"`
-	IsAvailable bool       `gorm:"not null" json:"is_available"`
-	Date        FlexDate   `gorm:"type:date;not null" json:"date"`
-	StartTime   FlexTime   `gorm:"type:time;not null" json:"start_time"`
-	EndTime     FlexTime   `gorm:"type:time;not null" json:"end_time"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	Doctor      DoctorList `gorm:"foreignKey:DoctorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"doctor"`
+	gorm.Model
+	DoctorID    uint     `gorm:"not null" json:"doctor_id"`
+	DayOfWeek   string   `gorm:"type:varchar(10);not null" json:"day"`
+	IsAvailable bool     `gorm:"not null" json:"is_available"`
+	Date        FlexDate `gorm:"type:date;not null" json:"date"`
+	StartTime   FlexTime `gorm:"type:time; not null" json:"start_time"`
+	EndTime     FlexTime `gorm:"type:time;not null" json:"end_time"`
+
+	Doctor DoctorList `gorm:"foreignKey:DoctorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"doctor"`
 }
 
 // FlexTime handles time fields with database and JSON conversion
